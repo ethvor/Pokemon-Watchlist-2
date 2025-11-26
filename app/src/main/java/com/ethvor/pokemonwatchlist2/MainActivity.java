@@ -7,8 +7,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ListView;
+import android.widget.ArrayAdapter;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
 
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.error.ANError;
@@ -30,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView pokemonMove;
     private TextView pokemonAbility;
     private ImageView pokemonImage;
+    private ListView watchlistView;
+    private ArrayList<String> watchlist;
+    private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +54,20 @@ public class MainActivity extends AppCompatActivity {
         pokemonMove = findViewById(R.id.pokemonMove);
         pokemonAbility = findViewById(R.id.pokemonAbility);
         pokemonImage = findViewById(R.id.pokemonImage);
+        watchlistView = findViewById(R.id.watchlistView);
+
+        watchlist = new ArrayList<>();
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, watchlist);
+        watchlistView.setAdapter(adapter);
+
+        watchlistView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                String item = watchlist.get(position);
+                String pokemonId = item.split(" ")[0];
+                fetchPokemon(pokemonId);
+            }
+        });
 
         searchButton.setOnClickListener(v -> {
             String input = searchInput.getText().toString().toLowerCase();
@@ -103,6 +124,13 @@ public class MainActivity extends AppCompatActivity {
             pokemonAbility.setText("Ability: " + ability);
 
             loadImage(imageUrl);
+
+            //add to watchlist
+            String entry = id + " " + name;
+            if (!watchlist.contains(entry)) {
+                watchlist.add(entry);
+                adapter.notifyDataSetChanged();
+            }
         } catch (Exception e) {
         }
     }
